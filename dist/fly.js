@@ -234,6 +234,7 @@ var Fly = function () {
             baseURL: "",
             headers: {},
             timeout: 0,
+            async: true,
             params: {}, // Default Url params
             parseJson: true, // Convert response data to JSON object automatically.
             withCredentials: false
@@ -337,7 +338,7 @@ var Fly = function () {
                         url += (url.indexOf("?") === -1 ? "?" : "&") + _params.join("&");
                     }
 
-                    engine.open(options.method, url);
+                    engine.open(options.method, url, options.async);
 
                     // try catch for ie >=9
                     try {
@@ -415,9 +416,9 @@ var Fly = function () {
                             // The xhr of IE9 has not response field
                             var response = engine.response || engine.responseText;
                             if (response && options.parseJson && (engine.getResponseHeader(contentType) || "").indexOf("json") !== -1
-                                // Some third engine implementation may transform the response text to json object automatically,
-                                // so we should test the type of response before transforming it
-                                && !utils.isObject(response)) {
+                            // Some third engine implementation may transform the response text to json object automatically,
+                            // so we should test the type of response before transforming it
+                            && !utils.isObject(response)) {
                                 response = JSON.parse(response);
                             }
 
@@ -435,7 +436,7 @@ var Fly = function () {
                             }
                             var status = engine.status;
                             var statusText = engine.statusText;
-                            var _data = {data: response, headers: headers, status: status, statusText: statusText};
+                            var _data = { data: response, headers: headers, status: status, statusText: statusText };
                             // The _response filed of engine is set in  adapter which be called in engine-wrapper.js
                             utils.merge(_data, engine._response);
                             if (status >= 200 && status < 300 || status === 304) {
@@ -460,9 +461,7 @@ var Fly = function () {
                         onerror(new Err("timeout [ " + engine.timeout + "ms ]", 1));
                     };
                     engine._options = options;
-                    setTimeout(function () {
-                        engine.send(needQuery ? null : data);
-                    }, 0);
+                    engine.send(needQuery ? null : data);
                 }
 
                 enqueueIfLocked(requestInterceptor.p, function () {
@@ -523,11 +522,11 @@ Fly.default = Fly;
         return this.request(url, data, utils.merge({ method: e }, option));
     };
 });
-        ["lock", "unlock", "clear"].forEach(function (e) {
-            Fly.prototype[e] = function () {
-                this.interceptors.request[e]();
-            };
-        });
+["lock", "unlock", "clear"].forEach(function (e) {
+    Fly.prototype[e] = function () {
+        this.interceptors.request[e]();
+    };
+});
 // Learn more about keep-loader: https://github.com/wendux/keep-loader
 KEEP("cdn||cdn-min", function () {
     // This code block will be removed besides the  "CDN" and "cdn-min" build environment
