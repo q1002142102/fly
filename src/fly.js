@@ -72,6 +72,7 @@ class Fly {
             baseURL: "",
             headers: {},
             timeout: 0,
+            async:true,
             params: {}, // Default Url params
             parseJson: true, // Convert response data to JSON object automatically.
             withCredentials: false
@@ -171,7 +172,7 @@ class Fly {
                     url += (url.indexOf("?") === -1 ? "?" : "&") + _params.join("&");
                 }
 
-                engine.open(options.method, url);
+                engine.open(options.method, url,options.async);
 
                 // try catch for ie >=9
                 try {
@@ -297,9 +298,7 @@ class Fly {
                     onerror(new Err(`timeout [ ${engine.timeout}ms ]`, 1))
                 }
                 engine._options = options;
-                setTimeout(() => {
-                    engine.send(needQuery ? null : data)
-                }, 0)
+                engine.send(needQuery ? null : data)
             }
 
             enqueueIfLocked(requestInterceptor.p, () => {
